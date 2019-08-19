@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>Vacation Planner</title>
+    <style>
+        .carousel-inner img {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-info">
+        <h3 class="text-white">Vacation Planner</h3>
+        <a class='ml-auto mr-3 text-light' href="/home">Home</a>
+        <a class='text-light' href="/logout">Logout</a>
+    </nav>
+    <div class="container-fluid">
+        <div class="card w-50 offset-3 mt-5 border border-info">
+            {#<img class="card-img-top" src="/images/pathToYourImage.png" alt="Card image cap">#}
+            <div class="card-body">
+                <h4 class="card-title">{{ selected_trip.title }}</h4>
+
+                <span class='font-weight-bold'>Address: </span>
+                <p class="card-text"> {{ selected_trip.formatted_address }}</p>
+
+                <span class='font-weight-bold'>Phone Number: </span>
+                <p class="card-text">{{ selected_trip.phone_number }}</p>
+
+                <span class='font-weight-bold'>Reviews: </span>
+                <p class="card-text">{{ selected_trip.review }}</p>
+
+                <p class="card-text"> <span class='font-weight-bold'>Rating: </span> {{ selected_trip.rating }}</p>
+                <div class="row">
+                    <div class="col-6">
+                        <div class='hours d-inline-block'>
+                            <span class='font-weight-bold'>Hours: </span><br>
+                            <span class="card-text"> {{ formatted_hours }}</span><br>
+                            {% for hours in split_hours %}
+                            <span class="card-text"> {{ hours }}</span><br>
+                            {% endfor %}
+                            <span class="card-text">{{formatted_hours2}}</span><br>
+                        </div> <br><br>
+                        {% if selected_trip.website != "Sorry, no website available" %}
+                        <p class="card-text">
+                            <a target="_blank" href="{{ selected_trip.website }}">Click here to visit this place's
+                                website</a>
+                        </p> <br>
+                        {% else %}
+                        <p class="card-text">No Website Available</p>
+                        {% endif %}
+                        <a href="/" class="btn btn-info">Home</a>
+                    </div>
+                    <div class="col-6">
+
+                        <div id="demo" class="carousel slide" data-ride="carousel">
+                            <!-- Indicators -->
+                            <ul class="carousel-indicators">
+                                <li data-target="#demo" data-slide-to="0" class="active"></li>
+                                <li data-target="#demo" data-slide-to="1"></li>
+                                <li data-target="#demo" data-slide-to="2"></li>
+                            </ul>
+                            <!-- The slideshow -->
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <img style="height: 350px" class=""
+                                        src="https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={{ photo0 }}&key=AIzaSyDcuEo_YNfM-UN8VWL9IeXtfJHR30R4I_0"
+                                        alt="">
+                                </div>
+                                <div class="carousel-item">
+                                    <img style="height: 350px" class=""
+                                        src="https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={{ photo1 }}&key=AIzaSyDcuEo_YNfM-UN8VWL9IeXtfJHR30R4I_0"
+                                        alt="">
+                                </div>
+                                <div class="carousel-item">
+                                    <img style="height: 350px" class=""
+                                        src="https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={{ photo2 }}&key=AIzaSyDcuEo_YNfM-UN8VWL9IeXtfJHR30R4I_0"
+                                        alt="">
+                                </div>
+                            </div>
+
+                            <!-- Left and right controls -->
+                            <a class="carousel-control-prev" href="#demo" data-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </a>
+                            <a class="carousel-control-next" href="#demo" data-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row offset-10 mt-5">
+                        <p class="small">Created by: {{ selected_trip.trip_host.first_name }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
