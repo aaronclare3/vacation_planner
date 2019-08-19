@@ -4,17 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Login and Register</title>
+    <title>Vacation Planner</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <style>
+        #map {
+            height:600px;
+            border: 2px solid black;
+        }
+        .scroll{
+            height: 800px;
+            overflow-y: auto; 
+            word-wrap: break-word; 
+    }
+    </style>
+    <title>Vacation Planner</title>
+    {%load static%}
 </head>
 <body>
-    <nav class="p-4 navbar navbar-light bg-info mb-5">
+    <nav class="p-4 navbar text-white navbar-light bg-info mb-5">
+        <h3>Vacation Planner</h3>
         <div class="col-4 ml-auto">
             <a href="/create" class= "mr-2 text-white">Create a New Trip</a>
-            <a class='mr-2 text-white' href="/home">Home</a>
             <a class='text-white' href="/logout">Logout</a>
         </div>
     </nav>
@@ -22,7 +35,7 @@
         <h2>Welcome {{ current_user.first_name }}!</h2>
         <h4>Your Trips</h4>
         <div class='container-fluid'>
-            <table class="table-dark table table-hover text-centered">
+            <table class="table table-hover text-centered mb-5">
                 <tr>
                     <td>Destination</td>
                     <td>Start Date</td>
@@ -47,28 +60,90 @@
             </table>
         </div>
 
-        <h4>All Trips</h4>
-        <div class='container-fluid'>
-            <table class="table-dark table table-hover text-centered">
-                <tr>
-                    <td>Destination</td>
-                    <td>Start Date</td>
-                    <td>End Date</td>
-                    <td>Plan</td>
-                    <td>Want to Join?</td>
-                </tr>
-                {% for trip in all_trips %}
-                {% if trip not in users_trips %}
-                <tr>
-                    <td><a href="trips/{{trip.id}}">{{ trip.destination }}</a></td>
-                    <td>{{ trip.start_date }}</td>
-                    <td>{{ trip.end_date }}</td>
-                    <td>{{ trip.plan }}</td>
-                    <td><a href="jointrip/{{trip.id}}">Join</a></td>
-                </tr>
+        <h4 class="text-center">Check out other popular vacation spots for inspiration!</h4>
+        <div class="row">
+            <div class="col-3 scroll">
+                {% for trip in sidebar_trips %}
+                <a href="trips/{{trip.id}}"><header>{{trip.title}}</header></a>
+                <span class='small font-weight-bold'>Phone: </span><span class="small">{{ trip.phone_number }}</span><br>
+                <span class='small font-weight-bold'>Rating: </span><span class="small">{{ trip.rating }}</span><br>
+                <span class='small font-weight-bold'>Review: </span><span class="small">{{ trip.review | truncatechars:85 }} <a href="trips/{{trip.id}}" class="small">Read Full Review</a></span><br>
+                <span class='small font-weight-bold'>Webite: </span><span class="small"><a href="{{trip.website}}" target="_blank"> {{ trip.website }}</a></span><br>
+                {% if trip.trip_host.id == current_user.id %}
+                <a class="text-danger" href="remove/{{trip.id}}"><span class="small">Remove Trip</span></a>
                 {% endif %}
+                <hr>
                 {% endfor %}
-            </table>
+            </div>
+            <div class="col-7">
+                <div class="row">
+                    <div class="col-12">
+                        <div id="map"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    <script>
+            
+        function initMap() {
+            var options = {
+                zoom: 2,
+                center: {lat: 14.50, lng: -25}
+            }
+            var map = new google.maps.Map(document.getElementById("map"), options);
+
+            marker = []
+            {% for trip in all_trips %}
+            
+            iwcontentstr = '<div id="content">'+'<div id="siteNotice">'+'</div>'+
+                            '<h5 id="firstHeading" class="firstHeading">{{trip.title}}</h1>'+'<div id="bodyContent">'+
+                            '<p><b>Address:</b> {{trip.formatted_address}}</p>' +
+                            '</div>'+
+                            '</div>';
+            
+            
+            
+            props = {
+                'coords': {lat: {{trip.latitude}}, lng: {{trip.longitude}}},
+                'content': iwcontentstr
+            }
+            marker.push(props)
+            {% endfor %}
+
+            for (var i = 0; i < marker.length; i++){
+                addMarker(marker[i]);
+            }
+
+            marker.addEventListener("onmouseover", function(){
+                marker.grow
+            });
+
+            // THE FUNCTION FOR ADDING A MARKER
+            function addMarker(props){
+                var marker = new google.maps.Marker({
+                    position: props.coords,
+                    map: map,
+                    animation: google.maps.Animation.DROP,
+                    // content: props.content
+                });
+                if(props.content){
+                    var infowindow = new google.maps.InfoWindow({
+                        content: props.content
+                    });
+                    marker.addListener('click', function() {
+                    infowindow.open(map, marker);
+                    });
+                }
+            }
+        }
+
+    </script>
+
+    <script async defer 
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB4HjeXhplfNZb1oPX3HlrQkFz2FuCzoAs&callback=initMap">
+    </script>
+</body>
+</html>
+        
 

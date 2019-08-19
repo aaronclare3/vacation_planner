@@ -31,12 +31,11 @@
     </nav>
     <div class="container-fluid">
         <div class="card w-50 offset-3 mt-5 border border-info">
-            {#<img class="card-img-top" src="/images/pathToYourImage.png" alt="Card image cap">#}
             <div class="card-body">
                 <h4 class="card-title">{{ selected_trip.title }}</h4>
 
-                <span class='font-weight-bold'>Address: </span>
-                <p class="card-text"> {{ selected_trip.formatted_address }}</p>
+                <span class='font-weight-bold'>Destination: </span>
+                <p class="card-text"> {{ selected_trip.destination }}</p>
 
                 <span class='font-weight-bold'>Phone Number: </span>
                 <p class="card-text">{{ selected_trip.phone_number }}</p>
@@ -63,18 +62,16 @@
                         {% else %}
                         <p class="card-text">No Website Available</p>
                         {% endif %}
-                        <a href="/" class="btn btn-info">Home</a>
+                        <a href="/home" class="btn btn-info">Home</a>
                     </div>
                     <div class="col-6">
 
                         <div id="demo" class="carousel slide" data-ride="carousel">
-                            <!-- Indicators -->
                             <ul class="carousel-indicators">
                                 <li data-target="#demo" data-slide-to="0" class="active"></li>
                                 <li data-target="#demo" data-slide-to="1"></li>
                                 <li data-target="#demo" data-slide-to="2"></li>
                             </ul>
-                            <!-- The slideshow -->
                             <div class="carousel-inner">
                                 <div class="carousel-item active">
                                     <img style="height: 350px" class=""
@@ -93,7 +90,6 @@
                                 </div>
                             </div>
 
-                            <!-- Left and right controls -->
                             <a class="carousel-control-prev" href="#demo" data-slide="prev">
                                 <span class="carousel-control-prev-icon"></span>
                             </a>

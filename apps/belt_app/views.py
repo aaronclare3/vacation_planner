@@ -8,7 +8,7 @@ from random import randint
 
 
 
-############ PROCESS LOGIN AND REG ##################
+############ LOGIN AND REG ##################
 
 #### REGISTER ####
 
@@ -30,7 +30,7 @@ def register(request):
         return redirect("/home")
 
 
-#### LOGIN ####
+#### LOGIN/LOGOUT ####
 
 def processlogin(request):
     errors = User.objects.login_validator(request.POST)
@@ -51,6 +51,13 @@ def loginpage(request):
         return render(request, 'belt_app/loginpage.html')
 
 
+def logout(request):
+    del request.session['user_id']
+    return redirect('/login')
+
+
+
+#### ALL TRIPS AND MAP ####
 def home(request):
     if "user_id" not in request.session:
         return redirect('/login')
@@ -60,17 +67,13 @@ def home(request):
             'current_user': current_user,
             'users_trips': current_user.users_trips.all(),
             'all_trips': Trip.objects.all(),
+            "sidebar_trips": Trip.objects.all().order_by("-id")[:10],
+            "last_trip": Trip.objects.last(),
         }
         return render (request, 'belt_app/home.html', context)
 
 
-def jointrip(request, num):
-    user_id = request.session['user_id']
-    curruser = User.objects.get(id=user_id)
-    trip = Trip.objects.get(id=num)
-    curruser.users_trips.add(trip)
-    return redirect('/home')
-
+#### DELETE A TRIP ####
 
 def removetrip(request, num):
     user_id = request.session['user_id']
@@ -79,6 +82,7 @@ def removetrip(request, num):
     curruser.users_trips.remove(trip)
     return redirect('/home')
 
+#### EDIT TRIP ####
 
 def edittrip(request):
     errors = User.objects.trip_validator(request.POST)
@@ -124,14 +128,6 @@ def deletetrip(request, num):
         return redirect("/home")
     else: 
         return redirect('/home')
-
-
-#### LOGOUT USER ####
-
-def logout(request):
-    del request.session['user_id']
-    return redirect('/login')
-
 
 
 

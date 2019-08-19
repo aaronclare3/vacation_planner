@@ -29,135 +29,82 @@
     </nav>
     <div class="container">
         <h2>Hello {{ current_user.first_name }}! Schedule an upcoming trip!</h2>
-        <div class="col-3 scroll">
-            {% for trip in sidebar_trips %}
-            <a href="trips/{{trip.id}}"><header>{{trip.title}}</header></a>
-            <span class='small font-weight-bold'>Phone: </span><span class="small">{{ trip.phone_number }}</span><br>
-            <span class='small font-weight-bold'>Rating: </span><span class="small">{{ trip.rating }}</span><br>
-            <span class='small font-weight-bold'>Review: </span><span class="small">{{ trip.review | truncatechars:85 }} <a href="trips/{{trip.id}}" class="small">Read Full Review</a></span><br>
-            <span class='small font-weight-bold'>Webite: </span><span class="small"><a href="{{trip.website}}" target="_blank"> {{ trip.website }}</a></span><br>
-            {% if trip.trip_host.id == current_user.id %}
-            <a class="text-danger" href="remove/{{trip.id}}"><span class="small">Remove Trip</span></a>
-            {% endif %}
-            <hr>
-            {% endfor %}
-        </div>
-        <div class="col-7">
-                <div class="row mb-4 mt-3 align-items-center">
-                    <div class="col-6">
-                        <h5 class="mb-3" id="Anchor">Start planning your trips!</h5>
-                        <form action="process_create" method = 'post'>
+        <div class="row">
+            <div class="col-sm-10">
+                <div class="card">
+                    <div class="card-body">
+                        <form action="/process_create" class="form" method='post' autocomplete="off">
                             {% csrf_token %}
-                            <div class="form-group">
-                                <label for="title">Trip Title:</label>
-                                <input type="text" name='title'>
-                                <label for="destination">Destination:</label>
-                                <input type="text" name='destination'>
-                                <label for="startdate">Start Date: </label>
-                                <input type="date" name="startdate" id="startdate">
-                                <label for="enddate">End Date: </label>
-                                <input type="date" name="enddate" id="enddate"><br>
-                                <label for="plan">Plan: </label>
-                                <textarea type="text" id="plan" name='plan'></textarea>
-
-                                <div class="input-group-append">
-                                    <button class='btn btn-info btn-sm' type= 'submit'>Submit</button>
+                            <div class="form-group mb-4 row">
+                                <div class="col-lg-11">
+                                    <input type="text" id='title' name = 'title' class="form-control" placeholder='Trip Title'>
+                                        {% for message in messages %}
+                                        {% if message.extra_tags == 'destination' %}
+                                        <p class="position-absolute d-block text-danger"><small>{{ message }}</small></p>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
                                 </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-12">
-                        <div id="map"></div>
+                                
+                                <div class="form-group mb-4 row">
+                                    <div class="col-lg-11">
+                                        <input type="text" id='destination' name = 'destination' class="form-control" placeholder='Destination'>
+                                        {% for message in messages %}
+                                        {% if message.extra_tags == 'destination' %}
+                                        <p class="position-absolute d-block text-danger"><small>{{ message }}</small></p>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group mb-4 row">
+                                    <div class="col-lg-11">
+                                        <label for="startdate">Start Date</label>
+                                        <input type="date" name="startdate" id="startdate">
+                                        {% for message in messages %}
+                                        {% if message.extra_tags == 'enterstartdate' or message.extra_tags == 'date' %}
+                                        <p class="position-absolute d-block text-danger"><small>{{ message }}</small></p>
+                                        {% endif %}
+                                        {% endfor %}                                    
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group mb-4 row">
+                                    <div class="col-lg-11">
+                                        <label for="enddate">End Date</label>
+                                        <input type="date" name="enddate" id="enddate">
+                                        {% for message in messages %}
+                                        {% if message.extra_tags == 'invalid' or message.extra_tags == 'enterenddate' %}
+                                        <p class="position-absolute d-block text-danger"><small>{{ message }}</small></p>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group mb-4 row">
+                                    <div class="col-lg-11">
+                                        <textarea type="text" name='plan' class='form-control' placeholder='Plan'></textarea>
+                                        {% for message in messages %}
+                                        {% if message.extra_tags == 'plan' %}
+                                        <p class="position-absolute d-block text-danger"><small>{{ message }}</small></p>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group row">
+                                    <div class="col-lg-11">
+                                        <button type='reset' class='btn btn-secondary'>Cancel</button>
+                                        <button type='submit' class='btn text-white btn-info'>Submit</button>
+                                    </div>
+                                </div>
+                            </form>
+                            
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <script>
-    // Initialize and add the map
-        
-        function initMap() {
-            var options = {
-                zoom: 12,
-                center: {lat: 47.4, lng: -123}
-                    // {{last_trip.latitude}}, lng: {{last_trip.longitude}}}
-            }
-            var map = new google.maps.Map(document.getElementById("map"), options);
-
-        
-            // STORING ALL THE MARKERS IN AN ARRAY
-            // var markers = [
-            // {
-            //     coords: coords,
-            //     iconImage: {url:"/static/trips/img/icon.png", scaledSize: new google.maps.Size(30,30)},
-            //     content: '<p><strong>Bellevue, WA</strong></p><p>Butthole, WA</p>'
-            // }
-            // ]
-
-            // LOOPING THROUGH ARRAY TO DISPLAY MARKERS
-            // for (var i = 0; i < markers.length; i++){
-            //     addMarker(markers[i]);
-            // }
-
-            // marker = []
-            // {% for trip in all_trips %}
-            // coords = {lat: {{trip.latitude}}, lng: {{trip.longitude}}}
-            // content = '<p><strong>{{trip.title}}</strong></p><p>{{trip.address}}</p>'
-            // marker.push(coords)
-            // marker.push(content)
-            // {% endfor %}
-            marker = []
-            {% for trip in all_trips %}
-            
-            iwcontentstr = '<div id="content">'+'<div id="siteNotice">'+'</div>'+
-                            '<h5 id="firstHeading" class="firstHeading">{{trip.title}}</h1>'+'<div id="bodyContent">'+
-                            '<p><b>Address:</b> {{trip.formatted_address}}</p>' +
-                            '<a href="#" id="Anchor">Fireworks?</a> '+
-                            '</div>'+
-                            '</div>';
-            
-            
-            
-            props = {
-                'coords': {lat: {{trip.latitude}}, lng: {{trip.longitude}}},
-                'content': iwcontentstr
-            }
-            marker.push(props)
-            {% endfor %}
-
-            for (var i = 0; i < marker.length; i++){
-                addMarker(marker[i]);
-            }
-
-            marker.addEventListener("onmouseover", function(){
-                marker.grow
-            });
-
-            // THE FUNCTION FOR ADDING A MARKER
-            function addMarker(props){
-                var marker = new google.maps.Marker({
-                    position: props.coords,
-                    map: map,
-                    animation: google.maps.Animation.DROP,
-                    // content: props.content
-                });
-                if(props.content){
-                    var infowindow = new google.maps.InfoWindow({
-                        content: props.content
-                    });
-                    marker.addListener('click', function() {
-                    infowindow.open(map, marker);
-                    });
-                }
-            }
-        }
-
-    </script>
-
-    <script async defer 
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB4HjeXhplfNZb1oPX3HlrQkFz2FuCzoAs&callback=initMap">
-    </script>
 </body>
 </html>

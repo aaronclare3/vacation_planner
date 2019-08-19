@@ -7,7 +7,6 @@ urlpatterns = [
     url(r'^process_login$', views.processlogin),
     url(r'^logout$', views.logout),
     url(r'^home$', views.home),
-    url(r'^jointrip/(?P<num>\d+)$', views.jointrip),
     url(r'^removetrip/(?P<num>\d+)$', views.removetrip),
     url(r'^deletetrip/(?P<num>\d+)$', views.deletetrip),
     url(r'^editthis$', views.edittrip),
