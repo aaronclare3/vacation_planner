@@ -119,7 +119,6 @@ class Trip(models.Model):
     longitude = models.DecimalField(max_digits=8, decimal_places=4)
     latitude = models.DecimalField(max_digits=8, decimal_places=4)
     operating_hours = models.TextField(blank=True)
-    website = models.CharField(max_length=255, default="Sorry, no website found")
     phone_number = models.CharField(max_length=20, default="Sorry, no phone number found")
     trip_host = models.ForeignKey(User, related_name='trips_hosted')
     user = models.ManyToManyField(User, related_name='users_trips')

@@ -59,11 +59,17 @@ def logout(request):
 
 #### ALL TRIPS AND MAP ####
 def home(request):
+    if "res1" not in request.session:
+        request.session['res1'] = "Sorry no restaurants nearby"
+        request.session['res2'] = ""
+        request.session['res3'] = ""
+    x = [request.session['res1'], request.session['res2'], request.session['res3']]
     if "user_id" not in request.session:
         return redirect('/login')
     else:
         current_user = User.objects.get(id=request.session['user_id'])
         context = {
+            "nearby": x,
             'current_user': current_user,
             'users_trips': current_user.users_trips.all(),
             'all_trips': Trip.objects.all(),
@@ -85,7 +91,7 @@ def removetrip(request, num):
 #### EDIT TRIP ####
 
 def edittrip(request):
-    errors = User.objects.trip_validator(request.POST)
+    errors = Trip.objects.trip_validator(request.POST)
     trip_id = request.POST['trip_id']
     if len(errors) > 0:
         for key, value in errors.items():
@@ -184,10 +190,6 @@ def process_create(request):
         except:
             review_text = "No reviews yet"
         try:
-            website = res2['result']['website']
-        except:
-            website = "Sorry, no website available"
-        try:
             rating = res2['result']['rating']
         except:
             rating = 0
@@ -216,7 +218,6 @@ def process_create(request):
             longitude=longitude,
             latitude=latitude,
             operating_hours=hours,
-            website=website,
             phone_number=phone,
             trip_host=User.objects.get(id=request.session["user_id"])
         )
@@ -290,14 +291,36 @@ def tripinfo(request, tripid):
     return render(request, "belt_app/tripinfo.html", context)
 
 
-def removeTrip(request, trip_id):
-    created_trip = Trip.objects.get(id = trip_id)
-    if request.session['user_id'] == x.created_by.id :
-        x.delete()
-        return redirect('/')
+def removeTrip(request, tripid):
+    tripToDelete = Trip.objects.get(id = tripid)
+    if request.session['user_id'] == tripToDelete.trip_host.id :
+        tripToDelete.delete()
+        return redirect('/home')
     else:
-        return redirect('/')
+        return redirect('/home')
 
 
 
 
+def apis(request, lat, long):
+    nearby = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={lat},{long}&radius=15000&type=hotel&key=AIzaSyDcuEo_YNfM-UN8VWL9IeXtfJHR30R4I_0"
+    req = requests.get(nearby)
+    res = req.json()
+    print(res)
+
+    try:
+        request.session['res1'] = res['results'][0]['name']
+    except:
+        request.session['res1'] = "No restaurants nearby"
+    try:
+        request.session['res2'] = res['results'][1]['name']
+    except:
+        request.session['res2'] = ""
+    try:
+        request.session['res3'] = res['results'][2]['name']
+    except:
+        request.session['res3'] = ""
+
+    return redirect("/home")
+    
+    

@@ -31,12 +31,13 @@
             <a class='text-white' href="/logout">Logout</a>
         </div>
     </nav>
-    <div class="container">
+    <div class="contain  m-3">
         <h2>Welcome {{ current_user.first_name }}!</h2>
         <h4>Your Trips</h4>
         <div class='container-fluid'>
             <table class="table table-hover text-centered mb-5">
-                <tr>
+                <tr class="font-weight-bold">
+                    <td>Trip Title</td>
                     <td>Destination</td>
                     <td>Start Date</td>
                     <td>End Date</td>
@@ -45,7 +46,8 @@
                 </tr>
                 {% for trip in users_trips %}
                 <tr>
-                    <td><a href="trips/{{trip.id}}">{{ trip.destination }}</a></td>
+                    <td><a class="text-info" href="trips/{{trip.id}}">{{ trip.title }}</a></td>
+                    <td>{{ trip.destination }}</td>
                     <td>{{ trip.start_date }}</td>
                     <td>{{ trip.end_date }}</td>
                     <td>{{ trip.plan }}</td>
@@ -60,27 +62,33 @@
             </table>
         </div>
 
-        <h4 class="text-center">Check out other popular vacation spots for inspiration!</h4>
-        <div class="row">
+        <h4 class="text-center">Check out other user's vacation spots for inspiration!</h4>
+        <div class="row ml-3">
             <div class="col-3 scroll">
                 {% for trip in sidebar_trips %}
-                <a href="trips/{{trip.id}}"><header>{{trip.title}}</header></a>
-                <span class='small font-weight-bold'>Phone: </span><span class="small">{{ trip.phone_number }}</span><br>
-                <span class='small font-weight-bold'>Rating: </span><span class="small">{{ trip.rating }}</span><br>
-                <span class='small font-weight-bold'>Review: </span><span class="small">{{ trip.review | truncatechars:85 }} <a href="trips/{{trip.id}}" class="small">Read Full Review</a></span><br>
-                <span class='small font-weight-bold'>Webite: </span><span class="small"><a href="{{trip.website}}" target="_blank"> {{ trip.website }}</a></span><br>
+                <a href="trips/{{trip.id}}"><header class="font-weight-bold">{{trip.title}}</header></a>
+                <span class='small font-weight-bold'>Destination: {{trip.destination}} </span><br>
+                <span class='small font-weight-bold'><a href="https://www.google.com/search?q=flights to {{ trip.destination }}" target="_blank">Check out flights!</a></span><br>
                 {% if trip.trip_host.id == current_user.id %}
-                <a class="text-danger" href="remove/{{trip.id}}"><span class="small">Remove Trip</span></a>
+                <a class="text-danger" href="remove/{{trip.id}}"><span class="small">Remove Your Trip</span></a>
                 {% endif %}
                 <hr>
                 {% endfor %}
             </div>
-            <div class="col-7">
+            <div class="col-6">
                 <div class="row">
                     <div class="col-12">
                         <div id="map"></div>
                     </div>
                 </div>
+            </div>
+            <div class="col-2">
+                <span class='font-weight-bold'>Click a marker to see some hotels nearby! </span>
+                <ul class="list-unstyled card-text">
+                    {% for rest in nearby %}
+                        <li><a target="_blank" href="https://www.google.com/search?q={{rest}}">{{rest}}</a></li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>
@@ -127,6 +135,17 @@
                     animation: google.maps.Animation.DROP,
                     // content: props.content
                 });
+
+                marker.addListener('click', shownearby);
+                    function shownearby() {
+                        lat = props.coords.lat
+                        long = props.coords.lng
+                        window.location = 'http://localhost:8000/apis/' + lat + '/' + long
+                        $.getJSON(window.location, function(data, textStatus, jqXHR){
+                            console.log(data)
+                        });
+                    }
+
                 if(props.content){
                     var infowindow = new google.maps.InfoWindow({
                         content: props.content
