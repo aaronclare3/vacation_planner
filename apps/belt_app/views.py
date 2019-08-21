@@ -60,15 +60,17 @@ def logout(request):
 #### ALL TRIPS AND MAP ####
 def home(request):
     if "res1" not in request.session:
-        request.session['res1'] = "Sorry no restaurants nearby"
+        request.session['res1'] = "sorry"
         request.session['res2'] = ""
         request.session['res3'] = ""
-    x = [request.session['res1'], request.session['res2'], request.session['res3']]
+        request.session['res4'] = ""
+    x = [request.session['res1'], request.session['res2'], request.session['res3'], request.session['res4']]
     if "user_id" not in request.session:
         return redirect('/login')
     else:
         current_user = User.objects.get(id=request.session['user_id'])
         context = {
+            "nearby0": x[0],
             "nearby": x,
             'current_user': current_user,
             'users_trips': current_user.users_trips.all(),
@@ -78,15 +80,6 @@ def home(request):
         }
         return render (request, 'belt_app/home.html', context)
 
-
-#### DELETE A TRIP ####
-
-def removetrip(request, num):
-    user_id = request.session['user_id']
-    curruser = User.objects.get(id=user_id)
-    trip = Trip.objects.get(id=num)
-    curruser.users_trips.remove(trip)
-    return redirect('/home')
 
 #### EDIT TRIP ####
 
@@ -181,26 +174,6 @@ def process_create(request):
         req2 = requests.get(placesapi, params=params)
         res2 = req2.json()
         title = res2['result']['name']
-        try:
-            x = len(res2['result']['reviews'])
-        except:
-            review_text = "No reviews yet"
-        try:
-            review_text = res2['result']['reviews'][randint(1,x)]['text']
-        except:
-            review_text = "No reviews yet"
-        try:
-            rating = res2['result']['rating']
-        except:
-            rating = 0
-        try:
-            phone = res2['result']['formatted_phone_number']
-        except:
-            phone = "No Phone number available"
-        try:
-            hours = res2['result']['opening_hours']['weekday_text']
-        except:
-            hours = "No hours available"
         formatted_address = res2['result']['formatted_address']
         user_id = request.session['user_id']
         user = User.objects.get(id=user_id)
@@ -213,12 +186,8 @@ def process_create(request):
             end_date = request.POST['enddate'],
             address=request.POST['destination'],
             formatted_address=formatted_address,
-            review=review_text,
-            rating=rating,
             longitude=longitude,
             latitude=latitude,
-            operating_hours=hours,
-            phone_number=phone,
             trip_host=User.objects.get(id=request.session["user_id"])
         )
         new_trip.user.add(user)
@@ -227,27 +196,27 @@ def process_create(request):
 
 def tripinfo(request, tripid):
     trip = Trip.objects.get(id=tripid)
-    hours_str = trip.operating_hours #Get the string for place operating hours
-    print(hours_str)
-    if hours_str == "No hours available":
-        left_bracket = "No hours listed"
-        right_bracket= ""
-        split_list = []
-    else:
-        split_list = hours_str.split(",") #Split the string into a list of strings, separated by commas
+    nearby = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={trip.latitude},{trip.longitude}&radius=15000&type=hotel&key=AIzaSyDcuEo_YNfM-UN8VWL9IeXtfJHR30R4I_0"
+    req = requests.get(nearby)
+    res = req.json()
+    try:
+        request.session['res1'] = res['results'][1]['name']
+    except:
+        request.session['res1'] = "sorry"
+    try:
+        request.session['res2'] = res['results'][2]['name']
+    except:
+        request.session['res2'] = ""
+    try:
+        request.session['res3'] = res['results'][3]['name']
+    except:
+        request.session['res3'] = ""
+    try:
+        request.session['res4'] = res['results'][4]['name']
+    except:
+        request.session['res4'] = ""
+    x = [request.session['res1'], request.session['res2'], request.session['res3'], request.session['res4']]
 
-        #Replace [] and ' with empty string
-        for word in split_list:
-            if "[" in word:
-                left_bracket = word.replace("[", "") #Only returns Monday without [
-        for word in split_list:
-            if "]" in word:
-                right_bracket = word.replace("]", "") #Only returns Sunday without ]
-        for word in split_list:
-            if "'" in word:
-                quotation = word.replace("'", "") #Not working
-        
-        split_list = split_list[1:-1]
     googlemapsapi = "https://maps.googleapis.com/maps/api/geocode/json"
     params = {
         'address': Trip.objects.get(id=tripid).address,
@@ -280,13 +249,12 @@ def tripinfo(request, tripid):
         photo2 = ""
     
     context = {
+        "nearby0": x[0],
+        "nearby": x,
         "selected_trip": trip,
         'photo0': photo0,
         'photo1': photo1,
         'photo2': photo2,
-        "split_hours" : split_list,
-        "formatted_hours" : left_bracket,
-        "formatted_hours2" : right_bracket,
     }
     return render(request, "belt_app/tripinfo.html", context)
 
@@ -306,21 +274,22 @@ def apis(request, lat, long):
     nearby = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={lat},{long}&radius=15000&type=hotel&key=AIzaSyDcuEo_YNfM-UN8VWL9IeXtfJHR30R4I_0"
     req = requests.get(nearby)
     res = req.json()
-    print(res)
-
     try:
-        request.session['res1'] = res['results'][0]['name']
+        request.session['res1'] = res['results'][1]['name']
     except:
-        request.session['res1'] = "No restaurants nearby"
+        request.session['res1'] = "sorry"
     try:
-        request.session['res2'] = res['results'][1]['name']
+        request.session['res2'] = res['results'][2]['name']
     except:
         request.session['res2'] = ""
     try:
-        request.session['res3'] = res['results'][2]['name']
+        request.session['res3'] = res['results'][3]['name']
     except:
         request.session['res3'] = ""
-
+    try:
+        request.session['res4'] = res['results'][4]['name']
+    except:
+        request.session['res4'] = ""
     return redirect("/home")
     
     

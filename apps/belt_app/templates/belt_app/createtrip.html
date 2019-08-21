@@ -17,20 +17,22 @@
         }
         </style>
         <title>Vacation Planner</title>
-        {%load static%}
     </head>
-<body>
-    <nav class="p-4 navbar navbar-light bg-info mb-5">
-        <h3 class="text-white">Vacation Planner</h3>
+    <body>
+    {% load static %}
+    <nav class="p-3 navbar text-white navbar-light bg-info mb-3">
+        <h3 class="ml-2 mr-2">Vacation Planner</h3><img src="static/belt_app/images/air.ico" alt="">
         <div class="col-2 ml-auto">
-            <a class='mr-2 text-white' href="/home">Home</a>
+            <a href="/home" class= "mr-2 text-white">Home</a>
             <a class='text-white' href="/logout">Logout</a>
         </div>
     </nav>
-    <div class="container">
-        <h2>Hello {{ current_user.first_name }}! Schedule an upcoming trip!</h2>
-        <div class="row">
-            <div class="col-sm-10">
+    <div class="contain">
+        <div class="row justify-content-center">
+            <h4>Schedule an upcoming trip!</h4>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-sm-8">
                 <div class="card">
                     <div class="card-body">
                         <form action="/process_create" class="form" method='post' autocomplete="off">
@@ -94,7 +96,6 @@
                                 
                                 <div class="form-group row">
                                     <div class="col-lg-11">
-                                        <button type='reset' class='btn btn-secondary'>Cancel</button>
                                         <button type='submit' class='btn text-white btn-info'>Submit</button>
                                     </div>
                                 </div>

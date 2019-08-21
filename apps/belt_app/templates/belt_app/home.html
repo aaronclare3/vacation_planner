@@ -18,22 +18,30 @@
             height: 800px;
             overflow-y: auto; 
             word-wrap: break-word; 
-    }
+        }
+        a{
+            color: #17a2b8;
+        }
+
     </style>
     <title>Vacation Planner</title>
     {%load static%}
 </head>
 <body>
-    <nav class="p-4 navbar text-white navbar-light bg-info mb-5">
-        <h3>Vacation Planner</h3>
-        <div class="col-4 ml-auto">
+    <nav class="p-3 navbar text-white navbar-light bg-info mb-3">
+        <h3 class="ml-2 mr-2">Vacation Planner</h3><img src="{% static 'belt_app/images/air.ico' %}" alt="">
+        <div class="col-2 ml-auto">
             <a href="/create" class= "mr-2 text-white">Create a New Trip</a>
             <a class='text-white' href="/logout">Logout</a>
         </div>
     </nav>
-    <div class="contain  m-3">
-        <h2>Welcome {{ current_user.first_name }}!</h2>
-        <h4>Your Trips</h4>
+    <div class="contain m-3">
+        <div class="row justify-content-center">
+            <h4 class="ml-3">Welcome {{ current_user.first_name }}!</h4>
+        </div>
+        <div class="row justify-content-center">
+            <h4 class="ml-2">Your Trips</h4>
+        </div>
         <div class='container-fluid'>
             <table class="table table-hover text-centered mb-5">
                 <tr class="font-weight-bold">
@@ -46,7 +54,7 @@
                 </tr>
                 {% for trip in users_trips %}
                 <tr>
-                    <td><a class="text-info" href="trips/{{trip.id}}">{{ trip.title }}</a></td>
+                    <td><a href="trips/{{trip.id}}">{{ trip.title }}</a></td>
                     <td>{{ trip.destination }}</td>
                     <td>{{ trip.start_date }}</td>
                     <td>{{ trip.end_date }}</td>
@@ -54,8 +62,6 @@
 
                     {% if current_user.id == trip.trip_host.id %}
                     <td><a href="deletetrip/{{ trip.id }}">Remove</a> | <a href="trips/edit/{{ trip.id }}">Edit</a></td>
-                    {% else %}
-                    <td><a href="removetrip/{{ trip.id }}">Cancel</a>
                     {% endif %}
                 </tr>
                 {% endfor %}
@@ -64,16 +70,19 @@
 
         <h4 class="text-center">Check out other user's vacation spots for inspiration!</h4>
         <div class="row ml-3">
-            <div class="col-3 scroll">
-                {% for trip in sidebar_trips %}
-                <a href="trips/{{trip.id}}"><header class="font-weight-bold">{{trip.title}}</header></a>
-                <span class='small font-weight-bold'>Destination: {{trip.destination}} </span><br>
-                <span class='small font-weight-bold'><a href="https://www.google.com/search?q=flights to {{ trip.destination }}" target="_blank">Check out flights!</a></span><br>
-                {% if trip.trip_host.id == current_user.id %}
-                <a class="text-danger" href="remove/{{trip.id}}"><span class="small">Remove Your Trip</span></a>
-                {% endif %}
-                <hr>
-                {% endfor %}
+            <div class="col-3">
+                <h5>All user's 10 most recent trips planned!</h5>
+                <div class="scroll">
+                    {% for trip in sidebar_trips %}
+                    <a href="trips/{{trip.id}}"><header class="font-weight-bold">{{trip.title}}</header></a>
+                    <span class='small font-weight-bold'>Destination: {{trip.destination}} </span><br>
+                    <span class='small font-weight-bold'><a href="https://www.google.com/search?q=flights to {{ trip.destination }}" target="_blank">Check out flights!</a></span><br>
+                    {% if trip.trip_host.id == current_user.id %}
+                    <a class="text-danger" href="remove/{{trip.id}}"><span class="small">Remove Your Trip</span></a>
+                    {% endif %}
+                    <hr>
+                    {% endfor %}
+                </div>
             </div>
             <div class="col-6">
                 <div class="row">
@@ -82,12 +91,16 @@
                     </div>
                 </div>
             </div>
-            <div class="col-2">
+            <div class="col-3">
                 <span class='font-weight-bold'>Click a marker to see some hotels nearby! </span>
                 <ul class="list-unstyled card-text">
+                    {% if nearby0 != "sorry" %}
                     {% for rest in nearby %}
-                        <li><a target="_blank" href="https://www.google.com/search?q={{rest}}">{{rest}}</a></li>
+                    <li><a target="_blank" href="https://www.google.com/search?q={{rest}}">{{rest}}</a></li>
                     {% endfor %}
+                    {% else %}
+                    <p>Sorry, no hotels nearby</p>
+                    {% endif %}
                 </ul>
             </div>
         </div>
@@ -103,37 +116,22 @@
 
             marker = []
             {% for trip in all_trips %}
-            
-            iwcontentstr = '<div id="content">'+'<div id="siteNotice">'+'</div>'+
-                            '<h5 id="firstHeading" class="firstHeading">{{trip.title}}</h1>'+'<div id="bodyContent">'+
-                            '<p><b>Address:</b> {{trip.formatted_address}}</p>' +
-                            '</div>'+
-                            '</div>';
-            
-            
-            
-            props = {
-                'coords': {lat: {{trip.latitude}}, lng: {{trip.longitude}}},
-                'content': iwcontentstr
-            }
-            marker.push(props)
+                props = {
+                    'coords': {lat: {{trip.latitude}}, lng: {{trip.longitude}}},
+                }
+                marker.push(props)
             {% endfor %}
 
             for (var i = 0; i < marker.length; i++){
                 addMarker(marker[i]);
             }
 
-            marker.addEventListener("onmouseover", function(){
-                marker.grow
-            });
-
             // THE FUNCTION FOR ADDING A MARKER
             function addMarker(props){
                 var marker = new google.maps.Marker({
                     position: props.coords,
                     map: map,
-                    animation: google.maps.Animation.DROP,
-                    // content: props.content
+                    icon: {url: "{% static 'belt_app/images/sun.png' %}", scaledSize: new google.maps.Size(20, 20)}
                 });
 
                 marker.addListener('click', shownearby);
@@ -145,15 +143,6 @@
                             console.log(data)
                         });
                     }
-
-                if(props.content){
-                    var infowindow = new google.maps.InfoWindow({
-                        content: props.content
-                    });
-                    marker.addListener('click', function() {
-                    infowindow.open(map, marker);
-                    });
-                }
             }
         }
 
