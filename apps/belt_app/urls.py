@@ -4,6 +4,8 @@ from . import views
 from django.conf.urls.static import static
 
 urlpatterns = [
+    url(r'^apis/(?P<lat>-?[0-9]\d*(\.\d+)?)/(?P<long>-?[0-9]\d*(\.\d+)?)$', views.apis),
+    url(r'^$', views.redirecttohome),
     url(r'^login$', views.loginpage),
     url(r'^processregister$', views.register),
     url(r'^process_login$', views.processlogin),
@@ -16,5 +18,4 @@ urlpatterns = [
     url(r'^process_create$', views.process_create),
     url(r'^remove/(?P<tripid>\d+)$', views.removeTrip),
     url(r'^create$', views.create_trip),
-    url(r'^apis/(?P<lat>-?[0-9]\d*(\.\d+)?)/(?P<long>-?[0-9]\d*(\.\d+)?)$', views.apis),
 ]

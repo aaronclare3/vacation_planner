@@ -5,7 +5,8 @@ import requests
 from apps.belt_app.models import *
 from random import randint
 
-
+def redirecttohome(request):
+    return redirect("/login")
 
 
 ############ LOGIN AND REG ##################
@@ -274,6 +275,8 @@ def apis(request, lat, long):
     nearby = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={lat},{long}&radius=15000&type=hotel&key=AIzaSyDcuEo_YNfM-UN8VWL9IeXtfJHR30R4I_0"
     req = requests.get(nearby)
     res = req.json()
+    print(lat)
+    print(long)
     try:
         request.session['res1'] = res['results'][1]['name']
     except:
@@ -291,5 +294,3 @@ def apis(request, lat, long):
     except:
         request.session['res4'] = ""
     return redirect("/home")
-    
-    
